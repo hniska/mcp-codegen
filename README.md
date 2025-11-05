@@ -154,8 +154,6 @@ Install in development mode:
 pip install -e .
 ```
 
-For more details, see [CLAUDE.md](CLAUDE.md).
-
 ## License
 
 See repository for license information.
