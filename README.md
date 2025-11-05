@@ -33,7 +33,7 @@ Perfect for AI agents that need to work with MCP tools safely and efficiently.
 
 ## Quick Start
 
-> **Note:** mcp-codegen follows [Anthropic's MCP best practices](https://www.anthropic.com/research/building-effective-agents) for context-efficient agent workflows. See [Built on MCP Best Practices](#built-on-mcp-best-practices) for details.
+> **Note:** mcp-codegen follows [Anthropic's](https://www.anthropic.com/research/building-effective-agents) for context-efficient agent workflows. 
 
 ### Installation
 
