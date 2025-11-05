@@ -1,5 +1,7 @@
 # mcp-codegen
 
+> ⚡ This code has been vibe coded
+
 Generate Python client code from MCP (Model Context Protocol) servers.
 
 ## Features
