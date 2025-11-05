@@ -372,6 +372,14 @@ def _py_name(name: str) -> str:
         s = f"{s}_"
     return s
 
+def _generate_tools_hash(tools) -> str:
+    """Generate hash of tool definitions for change detection."""
+    import hashlib
+    content = ""
+    for tool in tools:
+        content += f"{tool.name}:{getattr(tool, 'description', '')}\n"
+    return hashlib.sha256(content.encode()).hexdigest()[:16]
+
 def render_module(module_name: str, tools) -> str:
     """Generate Python module code from MCP tool definitions.
 
@@ -574,3 +582,13 @@ def render_module(module_name: str, tools) -> str:
         out.append('        return res')
         out.append('')
     return "\n".join(out)
+
+def generate_fs_layout_wrapper(
+    base_url: str,
+    module_name: str,
+    tools,
+    output_dir: str = "servers"
+) -> None:
+    """Generate filesystem layout (wrapper for fs_layout module)."""
+    from .fs_layout import generate_fs_layout as _generate
+    _generate(base_url, module_name, tools, output_dir)

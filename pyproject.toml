@@ -1,7 +1,7 @@
 [project]
 name = "mcp-codegen"
-version = "0.1.4"
-description = "Generate Python client code from MCP (Model Context Protocol) servers"
+version = "1.0.0"
+description = "Generate Python client code from MCP (Model Context Protocol) servers + Python runner"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -15,6 +15,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+runner = [
+  "python3-seccomp>=1.2.3; sys_platform == 'linux'",  # Optional for Linux sandboxing
+]
 test = [
   "pytest>=8.0",
   "pytest-asyncio>=0.23",
