@@ -374,7 +374,7 @@ mcp-codegen run \
   [--workspace <DIR>] \
   [--cpu-seconds <N>] \
   [--memory-mb <N>] \
-  [--allow-network] \
+  [--disable-network] \
   [--seccomp] \
   [--firejail]
 ```
@@ -385,7 +385,7 @@ mcp-codegen run \
 - `--workspace DIR` (default: .workspace) - Workspace output directory
 - `--cpu-seconds N` (default: 10) - CPU time limit in seconds
 - `--memory-mb N` (default: 512) - Memory limit in MB
-- `--allow-network` - Allow network access (disabled by default)
+- `--disable-network` - Block network access (enabled by default for MCP tools)
 - `--seccomp` - Enable seccomp syscall filtering (Linux only)
 - `--firejail` - Run with Firejail sandbox (Linux only)
 
@@ -407,7 +407,7 @@ Enable hardening:
 ```bash
 mcp-codegen run --file agent.py \
   --seccomp \
-  --allow-network  # Only if API calls needed
+  --disable-network  # Block network if not needed
 ```
 
 Use Firejail sandbox:
@@ -522,10 +522,11 @@ logger.info("Processing data", status="ok")
    - File descriptors: 64 (prevents resource exhaustion)
    - Processes: 64 (prevents fork bombs)
 
-2. **Network Isolation** (all platforms)
-   - Disabled by default - no socket access
-   - Blocks: `socket.socket()`, `socket.create_connection()`, etc.
-   - Purpose: Force use of MCP client instead of direct API calls
+2. **Network Isolation** (Python level only)
+   - Enabled by default - allows MCP tool calls
+   - Blocks: `socket.socket()`, `socket.create_connection()`, etc. when disabled
+   - **⚠️ Also blocks MCP client** - use `--disable-network` only if no API calls needed
+   - Purpose: Optionally prevent data exfiltration via direct network access
 
 3. **Output Limits** (all platforms)
    - 200KB stdout cap (prevents spam)
@@ -563,13 +564,13 @@ for tool in tools:
 mcp-codegen run --file agent.py \
   --cpu-seconds 30 \
   --memory-mb 1024 \
-  --seccomp \
-  --allow-network  # Only for MCP API calls
+  --seccomp
+  # Network enabled by default for MCP tools
 ```
 
 **What happens:**
 1. ✅ Agent starts with resource limits applied
-2. ✅ Network is blocked (only Python can call MCP client)
+2. ✅ Network enabled for MCP tool calls
 3. ✅ Agent searches tools without loading schemas
 4. ✅ Agent loads only needed tools on demand
 5. ✅ Agent calls MCP tools via `await tool.call(...)`
@@ -1005,14 +1006,14 @@ When contributing:
 
 ### Network Isolation
 
-By default, `mcp-codegen run` blocks all network access:
+By default, `mcp-codegen run` allows network access for MCP tools. Use `--disable-network` to block all network:
 
 ```python
-# This will fail (network disabled)
+# With --disable-network flag:
 import socket
-socket.socket()  # RuntimeError: Network disabled
+socket.socket()  # RuntimeError: Network access blocked
 
-# This works (MCP client)
+# By default, this works:
 from servers.my_tool import call
 result = await call(base_url, params)
 ```

@@ -151,7 +151,7 @@ def _search(query: str, servers_dir: str = "servers", detail: str = "basic"):
 
 
 def _run(file: str, code: str, servers_dir: str = "servers", workspace: str = ".workspace",
-         cpu_seconds: int = 10, memory_mb: int = 512, allow_network: bool = False,
+         cpu_seconds: int = 10, memory_mb: int = 512, disable_network: bool = False,
          seccomp: bool = False, firejail: bool = False):
     """Execute agent code with resource limits.
 
@@ -162,14 +162,14 @@ def _run(file: str, code: str, servers_dir: str = "servers", workspace: str = ".
         workspace: Workspace directory for agent output
         cpu_seconds: CPU time limit in seconds
         memory_mb: Memory limit in MB
-        allow_network: Whether to allow network access
+        disable_network: Whether to disable network access (allowed by default)
         seccomp: Whether to enable seccomp filtering (Linux only)
         firejail: Whether to use Firejail sandbox (Linux only)
     """
     try:
         # Build runner command
-        # Path: src/mcp_codegen/cli.py -> need to go up 4 levels to reach project root
-        runner_path = Path(__file__).parent.parent.parent.parent / "examples" / "runner" / "run.py"
+        # Path: src/mcp_codegen/cli.py -> runner is in same package
+        runner_path = Path(__file__).parent / "runner" / "run.py"
 
         if not runner_path.exists():
             print(f"✗ Runner not found: {runner_path}", file=sys.stderr)
@@ -193,8 +193,8 @@ def _run(file: str, code: str, servers_dir: str = "servers", workspace: str = ".
             "--memory-mb", str(memory_mb),
         ])
 
-        if allow_network:
-            runner_args.append("--allow-network")
+        if disable_network:
+            runner_args.append("--disable-network")
         if seccomp:
             runner_args.append("--seccomp")
         if firejail:
@@ -354,7 +354,7 @@ def main():
     s_run.add_argument("--workspace", default=".workspace", help="Workspace directory (default: .workspace)")
     s_run.add_argument("--cpu-seconds", type=int, default=10, help="CPU time limit (default: 10)")
     s_run.add_argument("--memory-mb", type=int, default=512, help="Memory limit in MB (default: 512)")
-    s_run.add_argument("--allow-network", action="store_true", help="Allow network access (disabled by default)")
+    s_run.add_argument("--disable-network", action="store_true", help="Disable network access (enabled by default for MCP tool calls)")
     s_run.add_argument("--seccomp", action="store_true", help="Enable seccomp syscall filtering (Linux only)")
     s_run.add_argument("--firejail", action="store_true", help="Run with Firejail sandbox (Linux only)")
 
@@ -384,7 +384,7 @@ def main():
         _search(args.query, servers_dir=args.servers_dir, detail=args.detail)
     elif args.cmd == "run":
         _run(file=args.file, code=args.code, servers_dir=args.servers_dir, workspace=args.workspace,
-             cpu_seconds=args.cpu_seconds, memory_mb=args.memory_mb, allow_network=args.allow_network,
+             cpu_seconds=args.cpu_seconds, memory_mb=args.memory_mb, disable_network=args.disable_network,
              seccomp=args.seccomp, firejail=args.firejail)
     elif args.cmd == "call":
         _validate_url(args.url, allow_local=args.allow_local, explicit_transport=False)
